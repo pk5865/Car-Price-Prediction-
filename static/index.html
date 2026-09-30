@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drivewise 2.0 - Car Price Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 900px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e0e0e0;
+            background: #f5f5f5;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .tab-button:hover {
+            background: #e8e8e8;
+        }
+        
+        .tab-button.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            margin-bottom: -2px;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0ff;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .result-value {
+            color: #667eea;
+            font-weight: 700;
+        }
+        
+        .message-box {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .error {
+            background: #ffe0e0;
+            color: #c00;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #c00;
+        }
+        
+        .success {
+            background: #e0ffe0;
+            color: #0c0;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border-left: 4px solid #0c0;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 AI USED CAR PRICE PREDICTION</h1>
+            <p>AI-Powered Car Price Intelligence</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('predict', event)">🎯 Predict</button>
+            <button class="tab-button" onclick="showTab('assistant', event)">🤖 Assistant</button>
+            <button class="tab-button" onclick="showTab('explain', event)">📊 Explain</button>
+            <button class="tab-button" onclick="showTab('info', event)">ℹ️ Info</button>
+        </div>
+        
+        <!-- TAB 1: PREDICT -->
+        <div id="predict" class="tab-content active">
+            <h2>💰 Predict Car Price</h2>
+            
+            <div class="form-group">
+                <label>Company</label>
+                <select id="company" onchange="updateModels()">
+                    <option value="">Select Company...</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Model</label>
+                <select id="model">
+                    <option value="">Select Model...</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Year</label>
+                <input type="number" id="year" min="1995" max="2026" value="2020">
+            </div>
+            
+            <div class="form-group">
+                <label>Kilometers Driven</label>
+                <input type="number" id="kms" min="0" max="500000" value="50000">
+            </div>
+            
+            <div class="form-group">
+                <label>Fuel Type</label>
+                <select id="fuel">
+                    <option value="">Select Fuel...</option>
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="CNG">CNG</option>
+                    <option value="LPG">LPG</option>
+                </select>
+            </div>
+            
+            <button onclick="predict()">Get Price Prediction</button>
+            
+            <div id="predictResult"></div>
+        </div>
+        
+        <!-- TAB 2: ASSISTANT -->
+        <div id="assistant" class="tab-content">
+            <h2>🤖 Ask the AI</h2>
+            <p>Ask anything about car prices and recommendations</p>
+            
+            <div class="form-group">
+                <label>Your Question</label>
+                <textarea id="question" rows="4" placeholder="e.g., What's the price of a Maruti Swift 2020?"></textarea>
+            </div>
+            
+            <button onclick="askAssistant()">Ask Assistant</button>
+            
+            <div id="assistantResult"></div>
+        </div>
+        
+        <!-- TAB 3: EXPLAIN -->
+        <div id="explain" class="tab-content">
+            <h2>📊 Prediction Explanation</h2>
+            <p>Understand how the price is calculated</p>
+            
+            <div class="form-group">
+                <label>Company</label>
+                <select id="explainCompany" onchange="updateModelsExplain()">
+                    <option value="">Select Company...</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Model</label>
+                <select id="explainModel">
+                    <option value="">Select Model...</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Year</label>
+                <input type="number" id="explainYear" min="1995" max="2026" value="2020">
+            </div>
+            
+            <div class="form-group">
+                <label>Kilometers</label>
+                <input type="number" id="explainKms" min="0" max="500000" value="50000">
+            </div>
+            
+            <div class="form-group">
+                <label>Fuel Type</label>
+                <select id="explainFuel">
+                    <option value="">Select Fuel...</option>
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="CNG">CNG</option>
+                    <option value="LPG">LPG</option>
+                </select>
+            </div>
+            
+            <button onclick="explain()">Explain Prediction</button>
+            
+            <div id="explainResult"></div>
+        </div>
+        
+        <!-- TAB 4: INFO -->
+        <div id="info" class="tab-content">
+            <h2>ℹ️ Model Information</h2>
+            
+            <div class="stats" id="stats"></div>
+            
+            <div class="message-box">
+                <strong>Dataset:</strong> 723 cars from Quikr and CarDekho<br>
+                <strong>Model:</strong> Gradient Boosting<br>
+                <strong>Accuracy:</strong> R² = 0.85<br>
+                <strong>Database:</strong> SQLite (local)
+            </div>
+            
+            <button onclick="loadInfo()">Load Full Info</button>
+            <div id="infoResult"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = window.location.origin || "http://127.0.0.1:8000";
+        let options = {};
+        
+        // Load options on page load
+        async function loadOptions() {
+            try {
+                const res = await fetch(`${API_URL}/api/options`);
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+                options = await res.json();
+                updateCompanyList();
+            } catch (e) {
+                console.error("Error loading options:", e);
+            }
+        }
+        
+        function updateCompanyList() {
+            const select = document.getElementById("company");
+            const explainSelect = document.getElementById("explainCompany");
+            select.innerHTML = '<option value="">Select Company...</option>';
+            explainSelect.innerHTML = '<option value="">Select Company...</option>';
+            
+            for (let company in options.companies) {
+                select.innerHTML += `<option value="${company}">${company}</option>`;
+                explainSelect.innerHTML += `<option value="${company}">${company}</option>`;
+            }
+        }
+        
+        function updateModels() {
+            const company = document.getElementById("company").value;
+            const select = document.getElementById("model");
+            select.innerHTML = '<option value="">Select Model...</option>';
+            
+            if (company && options.companies[company]) {
+                options.companies[company].forEach(model => {
+                    select.innerHTML += `<option value="${model}">${model}</option>`;
+                });
+            }
+        }
+        
+        function updateModelsExplain() {
+            const company = document.getElementById("explainCompany").value;
+            const select = document.getElementById("explainModel");
+            select.innerHTML = '<option value="">Select Model...</option>';
+            
+            if (company && options.companies[company]) {
+                options.companies[company].forEach(model => {
+                    select.innerHTML += `<option value="${model}">${model}</option>`;
+                });
+            }
+        }
+        
+        async function predict() {
+            const payload = {
+                company: document.getElementById("company").value,
+                model: document.getElementById("model").value,
+                year: parseInt(document.getElementById("year").value),
+                kms_driven: parseFloat(document.getElementById("kms").value),
+                fuel_type: document.getElementById("fuel").value
+            };
+            
+            if (!payload.company || !payload.model || !payload.fuel_type) {
+                alert("Please select all fields!");
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_URL}/api/predict`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    document.getElementById("predictResult").innerHTML = `<div class="error">${data.detail}</div>`;
+                    return;
+                }
+                
+                document.getElementById("predictResult").innerHTML = `
+                    <div class="result">
+                        <div class="result-item">
+                            <span class="result-label">Predicted Price:</span>
+                            <span class="result-value">₹${data.predicted_price.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Price Range:</span>
+                            <span class="result-value">₹${data.predicted_low.toLocaleString('en-IN')} - ₹${data.predicted_high.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Car:</span>
+                            <span class="result-value">${data.company} ${data.model} (${data.year})</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Confidence:</span>
+                            <span class="result-value">${data.confidence}</span>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                document.getElementById("predictResult").innerHTML = `<div class="error">Error: ${e.message}</div>`;
+            }
+        }
+        
+        async function askAssistant() {
+            const message = document.getElementById("question").value;
+            if (!message) {
+                alert("Please enter a question!");
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_URL}/api/assistant`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message })
+                });
+                
+                const data = await res.json();
+                document.getElementById("assistantResult").innerHTML = `
+                    <div class="message-box">
+                        <strong>AI Response:</strong><br>${data.response}
+                    </div>
+                `;
+            } catch (e) {
+                document.getElementById("assistantResult").innerHTML = `<div class="error">Error: ${e.message}</div>`;
+            }
+        }
+        
+        async function explain() {
+            const payload = {
+                company: document.getElementById("explainCompany").value,
+                model: document.getElementById("explainModel").value,
+                year: parseInt(document.getElementById("explainYear").value),
+                kms_driven: parseFloat(document.getElementById("explainKms").value),
+                fuel_type: document.getElementById("explainFuel").value
+            };
+            
+            if (!payload.company || !payload.model || !payload.fuel_type) {
+                alert("Please select all fields!");
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_URL}/api/explain`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                let importance = "";
+                for (let feature in data.feature_importance) {
+                    importance += `<div class="result-item"><span>${feature}</span><span>${(data.feature_importance[feature] * 100).toFixed(1)}%</span></div>`;
+                }
+                
+                document.getElementById("explainResult").innerHTML = `
+                    <div class="result">
+                        <strong>Price: ₹${data.prediction.predicted_price.toLocaleString('en-IN')}</strong><br><br>
+                        <strong>How it's calculated:</strong><br>${data.explanation}<br><br>
+                        <strong>Feature Importance:</strong><br>${importance}
+                    </div>
+                `;
+            } catch (e) {
+                document.getElementById("explainResult").innerHTML = `<div class="error">Error: ${e.message}</div>`;
+            }
+        }
+        
+        async function loadInfo() {
+            try {
+                const res = await fetch(`${API_URL}/api/model-info`);
+                const data = await res.json();
+                document.getElementById("infoResult").innerHTML = `
+                    <div class="result">
+                        <div class="result-item">
+                            <span class="result-label">Model Type:</span>
+                            <span class="result-value">${data.model_type}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Test R²:</span>
+                            <span class="result-value">${data.test_r2}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Test MAE:</span>
+                            <span class="result-value">₹${data.test_mae.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Trained Rows:</span>
+                            <span class="result-value">${data.trained_on_rows}</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Database:</span>
+                            <span class="result-value">${data.database}</span>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                document.getElementById("infoResult").innerHTML = `<div class="error">Error: ${e.message}</div>`;
+            }
+        }
+        
+        function showTab(tab, event) {
+            document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+            document.querySelectorAll(".tab-button").forEach(el => el.classList.remove("active"));
+            
+            document.getElementById(tab).classList.add("active");
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add("active");
+            }
+        }
+        
+        // Initialize on page load
+        loadOptions();
+    </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+FastAPI==0.104.1
+Uvicorn==0.24.0
+Pydantic==2.5.0
+SQLAlchemy==2.0.23
+pandas==2.1.3
+numpy==1.26.2
+scikit-learn==1.5.2
+python-dotenv==1.0.0
